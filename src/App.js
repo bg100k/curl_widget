@@ -1,7 +1,9 @@
+import * as ReactDOM from 'react-dom/client'
 import './App.css';
 import { useEffect, useRef } from 'react'
 import Map from '@arcgis/core/Map'
 import MapView from '@arcgis/core/views/MapView'
+import CustomWidget from './CustomWidget'
 
 function App() {
   const mapDiv = useRef()
@@ -18,6 +20,11 @@ function App() {
     });
 
     mapView.current.container = mapDiv.current
+
+    let widgetNode = document.createElement('div')
+    let widgetRoot = ReactDOM.createRoot(widgetNode)
+    mapView.current.ui.add(widgetNode, 'top-left')
+    widgetRoot.render(<CustomWidget />)
   }, [])
 
   return (

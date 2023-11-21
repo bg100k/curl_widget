@@ -1,43 +1,55 @@
 import * as ReactDOM from 'react-dom/client'
 import './App.css';
-import { useEffect, useRef } from 'react'
+import { Component, createRef } from 'react'
 import Map from '@arcgis/core/Map'
 import MapView from '@arcgis/core/views/MapView'
 import CustomWidget from './CustomWidget'
 
-function App() {
-  const mapDiv = useRef()
-  const map = useRef()
-  const mapView = useRef()
+class App extends Component {
+  mapDiv = createRef()
+  mapView
+  widgetsLoaded = false
 
-  useEffect(() => {
-    map.current = new Map({
+  componentDidMount = () => {
+    let map = new Map({
       basemap: 'streets-vector'
-    });
+    })
     
-    mapView.current = new MapView({
-      map: map.current
-    });
+    this.mapView = new MapView({
+      map: map,
+      zoom: 8,
+      center: {
+        latitude: 40,
+        longitude: -90
+      }
+    })
 
-    mapView.current.container = mapDiv.current
+    this.mapView.container = this.mapDiv.current
 
-    let widgetNode = document.createElement('div')
-    let widgetRoot = ReactDOM.createRoot(widgetNode)
-    mapView.current.ui.add(widgetNode, 'top-left')
-    widgetRoot.render(<CustomWidget />)
-  }, [])
+    this.mapView.when(() => {
+      if (!this.widgetsLoaded) {
+        let widgetNode = document.createElement('div')
+        let widgetRoot = ReactDOM.createRoot(widgetNode)
+        this.mapView.ui.add(widgetNode, 'top-left')
+        widgetRoot.render(<CustomWidget mapView={this.mapView} />)
+        this.widgetsLoaded = true
+      }
+    })
+  }
 
-  return (
-    <div
-      className="App"
-      ref={mapDiv}
-      style={{
-        height: '100vh',
-        width: '100vw'
-      }}
-    >
-    </div>
-  );
+  render = () => {
+    return (
+      <div
+        className="App"
+        ref={this.mapDiv}
+        style={{
+          height: '100vh',
+          width: '100vw'
+        }}
+      >
+      </div>
+    )
+  }
 }
 
-export default App;
+export default App
